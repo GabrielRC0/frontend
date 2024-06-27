@@ -10,6 +10,8 @@ interface AuthContextProps {
     setUser: React.Dispatch<React.SetStateAction<User | null>>;
     isAdmin: boolean;
     setIsAdmin: React.Dispatch<React.SetStateAction<boolean>>;
+    login: (token: string) => void;
+    logout: () => void;
 }
 
 export const AuthContext = createContext<AuthContextProps>({
@@ -17,6 +19,8 @@ export const AuthContext = createContext<AuthContextProps>({
     setUser: () => { },
     isAdmin: false,
     setIsAdmin: () => { },
+    login: () => { },
+    logout: () => { },
 });
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -47,12 +51,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
     }, [loading, user, navigate]);
 
+    const login = (token: string) => {
+        localStorage.setItem('token', token);
+        const decodedUser = jwt.jwtDecode<User>(token);
+        setAuthToken(token);
+        setUser(decodedUser);
+        setIsAdmin(decodedUser.role === 'admin');
+    };
+
+    const logout = () => {
+        localStorage.removeItem('token');
+        setAuthToken('');
+        setUser(null);
+        setIsAdmin(false);
+        navigate('/login');
+    };
+
     if (loading) {
         return <div>Loading...</div>;
     }
 
     return (
-        <AuthContext.Provider value={{ user, setUser, isAdmin, setIsAdmin }}>
+        <AuthContext.Provider value={{ user, setUser, isAdmin, setIsAdmin, login, logout }}>
             {children}
         </AuthContext.Provider>
     );

@@ -1,6 +1,6 @@
 // src/services/api.ts
 import axios from 'axios';
-import { logout } from './auth'; // Função para realizar o logout
+import { logout } from './auth';
 
 const api = axios.create({
     baseURL: 'http://localhost:3000/',
@@ -14,7 +14,6 @@ export const setAuthToken = (token: string) => {
     }
 };
 
-// Adiciona um interceptor para verificar a validade do token
 api.interceptors.response.use(
     response => response,
     error => {
@@ -25,5 +24,15 @@ api.interceptors.response.use(
         return Promise.reject(error);
     }
 );
+
+export const checkUsernameExists = async (username: string) => {
+    const response = await api.get(`/users/check-username?username=${username}`);
+    return response.data.exists;
+};
+
+export const checkEmailExists = async (email: string) => {
+    const response = await api.get(`/users/check-email?email=${email}`);
+    return response.data.exists;
+};
 
 export default api;

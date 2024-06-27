@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { register } from '../services/auth';
 import styled from 'styled-components';
+import { checkUsernameExists, checkEmailExists } from '../services/api';
 
 const FormContainer = styled.div`
   display: flex;
@@ -51,15 +52,35 @@ const Button = styled.button`
   }
 `;
 
+const ErrorMessage = styled.div`
+  color: red;
+  margin-bottom: 15px;
+`;
+
 const Register: React.FC = () => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [adminUuid, setAdminUuid] = useState('');
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
+
+    const usernameExists = await checkUsernameExists(username);
+    if (usernameExists) {
+      setError('Username already exists');
+      return;
+    }
+
+    const emailExists = await checkEmailExists(email);
+    if (emailExists) {
+      setError('Email already exists');
+      return;
+    }
+
     await register(username, email, password, adminUuid);
     navigate('/login');
   };
@@ -68,6 +89,7 @@ const Register: React.FC = () => {
     <FormContainer>
       <Form onSubmit={handleSubmit}>
         <h2>Register</h2>
+        {error && <ErrorMessage>{error}</ErrorMessage>}
         <FormGroup>
           <Label>Username</Label>
           <Input type="text" value={username} onChange={(e) => setUsername(e.target.value)} required />

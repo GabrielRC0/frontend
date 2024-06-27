@@ -30,7 +30,6 @@ const Home: React.FC = () => {
   return (
     <HomeContainer>
       <Title>Welcome, {user.username}!</Title>
-      <p>You are logged in.</p>
       <TeamMembers />
     </HomeContainer>
   );

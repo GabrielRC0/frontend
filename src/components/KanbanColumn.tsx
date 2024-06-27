@@ -1,5 +1,5 @@
 // src/components/KanbanColumn.tsx
-import Modal from 'react-modal'; // Corrigir o import
+import Modal from 'react-modal';
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { Task, User } from '../types';
@@ -65,6 +65,30 @@ const DeleteButton = styled.button`
   }
 `;
 
+const CloseButton = styled.button`
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  cursor: pointer;
+`;
+
+const customStyles = {
+  content: {
+    width: '900px',
+    height: '600px',
+    margin: 'auto',
+    padding: '20px',
+    borderRadius: '10px',
+    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+  },
+  overlay: {
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+};
+
 const KanbanColumn: React.FC<KanbanColumnProps> = ({
   title,
   tasks,
@@ -109,16 +133,15 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({
       ))}
       {placeholder}
       {taskToEdit && (
-        <Modal isOpen={isEditModalOpen} onRequestClose={closeEditModal} contentLabel="Edit Task">
-          <h2>Edit Task</h2>
+        <Modal isOpen={isEditModalOpen} onRequestClose={closeEditModal} contentLabel="Edit Task" style={customStyles}>
           <TaskForm
             task={taskToEdit}
+            onClose={closeEditModal}
             onTaskCreated={() => {
               onUpdateTask(taskToEdit);
               closeEditModal();
             }}
           />
-          <button onClick={closeEditModal}>Close</button>
         </Modal>
       )}
     </Column>

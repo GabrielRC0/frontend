@@ -1,89 +1,67 @@
 // src/pages/Dashboard.tsx
-import React, { useState, useContext, useEffect } from 'react';
-import Modal from 'react-modal';
-import TaskForm from '../components/TaskForm';
-import KanbanBoard from '../components/KanbanBoard';
-import UserList from '../components/UserList';
-import { AuthContext } from '../contexts/AuthContext';
+import React, { useState, useContext } from 'react';
 import styled from 'styled-components';
-import { Navigate } from 'react-router-dom';
-import api from '../services/api';
-import { User } from '../types';
-
-Modal.setAppElement('#root');
+import Modal from 'react-modal';
+import { AuthContext } from '../contexts/AuthContext';
+import KanbanBoard from '../components/KanbanBoard';
+import TaskForm from '../components/TaskForm';
 
 const DashboardContainer = styled.div`
   padding: 20px;
 `;
 
-const Button = styled.button`
+const CreateTaskButton = styled.button`
   padding: 10px 20px;
   background-color: #007bff;
   color: white;
   border: none;
   border-radius: 5px;
+  margin-left: 1.2%;
   cursor: pointer;
-  margin-bottom: 20px;
   &:hover {
     background-color: #0056b3;
   }
 `;
 
+const customStyles = {
+    content: {
+        width: '900px',
+        height: '600px',
+        margin: 'auto',
+        padding: '20px',
+        borderRadius: '10px',
+        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+    },
+    overlay: {
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+};
+
 const Dashboard: React.FC = () => {
     const { user } = useContext(AuthContext);
-    const [modalIsOpen, setModalIsOpen] = useState(false);
-    const [users, setUsers] = useState<User[]>([]);
-    const [tasksUpdated, setTasksUpdated] = useState(false); // Estado para controlar a atualização das tarefas
-
-    const fetchUsers = async () => {
-        const response = await api.get('/users');
-        setUsers(response.data);
-    };
-
-    useEffect(() => {
-        fetchUsers();
-    }, []);
-
-    const handleRemoveUser = (userId: string) => {
-        setUsers(users.filter(user => user._id !== userId));
-    };
-
-    const openModal = () => setModalIsOpen(true);
-    const closeModal = () => setModalIsOpen(false);
+    const [tasksUpdated, setTasksUpdated] = useState(false);
+    const [isModalOpen, setModalOpen] = useState(false);
 
     const handleTaskCreated = () => {
         setTasksUpdated(true);
         closeModal();
     };
 
-    if (!user) {
-        return <Navigate to="/login" />;
-    }
+    const openModal = () => {
+        setModalOpen(true);
+    };
+
+    const closeModal = () => {
+        setModalOpen(false);
+    };
 
     return (
         <DashboardContainer>
-            <Button onClick={openModal}>Create Task</Button>
-            <Modal
-                isOpen={modalIsOpen}
-                onRequestClose={closeModal}
-                contentLabel="Create Task"
-                style={{
-                    content: {
-                        top: '50%',
-                        left: '50%',
-                        right: 'auto',
-                        bottom: 'auto',
-                        marginRight: '-50%',
-                        transform: 'translate(-50%, -50%)',
-                        width: '50%',
-                    },
-                }}
-            >
-                <h2>Create Task</h2>
-                <TaskForm onTaskCreated={handleTaskCreated} />
-                <button onClick={closeModal}>Close</button>
+            <CreateTaskButton onClick={openModal}>Create Task</CreateTaskButton>
+            <Modal isOpen={isModalOpen} onRequestClose={closeModal} contentLabel="Create Task" style={customStyles}>
+                <TaskForm onTaskCreated={handleTaskCreated} onClose={closeModal} />
             </Modal>
-            <KanbanBoard tasksUpdated={tasksUpdated} setTasksUpdated={setTasksUpdated} /> {/* Passa o estado de atualização das tarefas */}
+            <KanbanBoard tasksUpdated={tasksUpdated} setTasksUpdated={setTasksUpdated} />
         </DashboardContainer>
     );
 };

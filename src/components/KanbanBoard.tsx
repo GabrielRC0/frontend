@@ -27,7 +27,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ tasksUpdated, setTasksUpdated
         try {
             const response = await api.get('/tasks');
             setTasks(response.data);
-            setTasksUpdated(false); // Reseta o estado de atualização após carregar as tarefas
+            setTasksUpdated(false);
         } catch (error) {
             console.error('Error fetching tasks:', error);
         }
@@ -103,7 +103,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ tasksUpdated, setTasksUpdated
                                 title={status}
                                 tasks={tasks.filter((task) => task.status === status)}
                                 onUpdateTask={updateTask}
-                                onDeleteTask={deleteTask} // Passando a função de deletar
+                                onDeleteTask={deleteTask}
                                 users={users}
                                 innerRef={provided.innerRef}
                                 droppableProps={provided.droppableProps}
