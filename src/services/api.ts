@@ -1,8 +1,9 @@
 // src/services/api.ts
 import axios from 'axios';
+import { logout } from './auth'; // Função para realizar o logout
 
 const api = axios.create({
-    baseURL: 'https://backend-home-wzmq.onrender.com',
+    baseURL: 'http://localhost:3000/',
 });
 
 export const setAuthToken = (token: string) => {
@@ -12,5 +13,17 @@ export const setAuthToken = (token: string) => {
         delete api.defaults.headers.common['Authorization'];
     }
 };
+
+// Adiciona um interceptor para verificar a validade do token
+api.interceptors.response.use(
+    response => response,
+    error => {
+        if (error.response.status === 401) {
+            logout();
+            window.location.href = '/login';
+        }
+        return Promise.reject(error);
+    }
+);
 
 export default api;

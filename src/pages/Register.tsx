@@ -1,15 +1,23 @@
-// src/pages/Register.tsx
 import React, { useState } from 'react';
-import { register } from '../services/auth';
 import { useNavigate } from 'react-router-dom';
+import { register } from '../services/auth';
 import styled from 'styled-components';
 
+const FormContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 60vh;
+  background-color: #ffffff;
+`;
+
 const Form = styled.form`
-  background-color: #f9f9f9;
+  background-color: #f1f0f0;
   padding: 20px;
-  margin: 20px 0;
   border-radius: 10px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  width: 500px;
 `;
 
 const FormGroup = styled.div`
@@ -32,50 +40,54 @@ const Input = styled.input`
 
 const Button = styled.button`
   padding: 10px 15px;
-  background-color: #28a745;
+  background-color: #003964;
   color: white;
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  width: 100%;
   &:hover {
-    background-color: #218838;
+    background-color: #044a80;
   }
 `;
 
 const Register: React.FC = () => {
-    const [username, setUsername] = useState('');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [adminUuid, setAdminUuid] = useState('');
-    const navigate = useNavigate();
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [adminUuid, setAdminUuid] = useState('');
+  const navigate = useNavigate();
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        await register(username, email, password, adminUuid);
-        navigate('/login');
-    };
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await register(username, email, password, adminUuid);
+    navigate('/login');
+  };
 
-    return (
-        <Form onSubmit={handleSubmit}>
-            <FormGroup>
-                <Label>Username</Label>
-                <Input type="text" value={username} onChange={(e) => setUsername(e.target.value)} required />
-            </FormGroup>
-            <FormGroup>
-                <Label>Email</Label>
-                <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-            </FormGroup>
-            <FormGroup>
-                <Label>Password</Label>
-                <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-            </FormGroup>
-            <FormGroup>
-                <Label>Admin UUID (Optional)</Label>
-                <Input type="text" value={adminUuid} onChange={(e) => setAdminUuid(e.target.value)} />
-            </FormGroup>
-            <Button type="submit">Register</Button>
-        </Form>
-    );
+  return (
+    <FormContainer>
+      <Form onSubmit={handleSubmit}>
+        <h2>Register</h2>
+        <FormGroup>
+          <Label>Username</Label>
+          <Input type="text" value={username} onChange={(e) => setUsername(e.target.value)} required />
+        </FormGroup>
+        <FormGroup>
+          <Label>Email</Label>
+          <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+        </FormGroup>
+        <FormGroup>
+          <Label>Password</Label>
+          <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+        </FormGroup>
+        <FormGroup>
+          <Label>Admin UUID (Optional)</Label>
+          <Input type="text" value={adminUuid} onChange={(e) => setAdminUuid(e.target.value)} />
+        </FormGroup>
+        <Button type="submit">Register</Button>
+      </Form>
+    </FormContainer>
+  );
 };
 
 export default Register;

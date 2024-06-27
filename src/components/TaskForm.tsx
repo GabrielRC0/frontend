@@ -1,13 +1,13 @@
 // src/components/TaskForm.tsx
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import styled from 'styled-components';
 import api from '../services/api';
 import { AuthContext } from '../contexts/AuthContext';
-import { getUsersByAdminUuid } from '../services/user';
-import { User } from '../types';
+import { User, Task } from '../types';
 
 interface TaskFormProps {
-    onTaskCreated: () => void;
+  onTaskCreated: () => void;
+  task?: Task; // Adicione a task como uma prop opcional
 }
 
 const Form = styled.form`
@@ -56,64 +56,74 @@ const Button = styled.button`
   }
 `;
 
-const TaskForm: React.FC<TaskFormProps> = ({ onTaskCreated }) => {
-    const { user } = useContext(AuthContext);
-    const [description, setDescription] = useState('');
-    const [deadline, setDeadline] = useState('');
-    const [priority, setPriority] = useState('Low');
-    const [assignee, setAssignee] = useState(user?._id);
-    const [users, setUsers] = useState<User[]>([]);
+const TaskForm: React.FC<TaskFormProps> = ({ onTaskCreated, task }) => {
+  const { user } = useContext(AuthContext);
+  const [description, setDescription] = useState(task?.description || '');
+  const [deadline, setDeadline] = useState(task?.deadline || '');
+  const [priority, setPriority] = useState(task?.priority || 'Low');
+  const [assignee, setAssignee] = useState(task?.assignee || '');
+  const [users, setUsers] = useState<User[]>([]);
 
-    useEffect(() => {
-        const fetchUsers = async () => {
-            if (user?.adminUuid) {
-                const fetchedUsers = await getUsersByAdminUuid(user.adminUuid);
-                setUsers(fetchedUsers);
-            }
-        };
-        fetchUsers();
-
-        console.log('user?.adminUuid', user?.adminUuid)
-    }, [user?.adminUuid]);
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        await api.post('/tasks', { description, deadline, priority, assignee });
-        onTaskCreated();
-        setDescription('');
-        setDeadline('');
-        setPriority('Low');
+  useEffect(() => {
+    const fetchUsers = async () => {
+      const response = await api.get(`/users?adminUuid=${user?.adminUuid}`);
+      setUsers(response.data);
     };
 
-    return (
-        <Form onSubmit={handleSubmit}>
-            <FormGroup>
-                <Label>Description</Label>
-                <Input type="text" value={description} onChange={(e) => setDescription(e.target.value)} required />
-            </FormGroup>
-            <FormGroup>
-                <Label>Deadline</Label>
-                <Input type="date" value={deadline} onChange={(e) => setDeadline(e.target.value)} required />
-            </FormGroup>
-            <FormGroup>
-                <Label>Priority</Label>
-                <Select value={priority} onChange={(e) => setPriority(e.target.value)} required>
-                    <option value="Low">Low</option>
-                    <option value="Medium">Medium</option>
-                    <option value="High">High</option>
-                </Select>
-            </FormGroup>
-            <FormGroup>
-                <Label>Assignee</Label>
-                <Select value={assignee} onChange={(e) => setAssignee(e.target.value)} required>
-                    {users.map((user) => (
-                        <option key={user._id} value={user._id}>{user.username}</option>
-                    ))}
-                </Select>
-            </FormGroup>
-            <Button type="submit">Create Task</Button>
-        </Form>
-    );
+    fetchUsers();
+  }, [user?.adminUuid]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (user) {
+      const taskData = {
+        description,
+        deadline,
+        priority,
+        user: user.username, // Envia o nome do usuário logado
+        assignee // Envia o nome do usuário selecionado como assignee
+      };
+      if (task) {
+        // Editar tarefa existente
+        await api.put(`/tasks/${task._id}`, taskData);
+      } else {
+        // Criar nova tarefa
+        await api.post('/tasks', taskData);
+      }
+      onTaskCreated(); // Chama a função de callback
+    }
+  };
+
+  return (
+    <Form onSubmit={handleSubmit}>
+      <FormGroup>
+        <Label>Description</Label>
+        <Input type="text" value={description} onChange={(e) => setDescription(e.target.value)} required />
+      </FormGroup>
+      <FormGroup>
+        <Label>Deadline</Label>
+        <Input type="date" value={deadline} onChange={(e) => setDeadline(e.target.value)} required />
+      </FormGroup>
+      <FormGroup>
+        <Label>Priority</Label>
+        <Select value={priority} onChange={(e) => setPriority(e.target.value)} required>
+          <option value="Low">Low</option>
+          <option value="Medium">Medium</option>
+          <option value="High">High</option>
+        </Select>
+      </FormGroup>
+      <FormGroup>
+        <Label>Assignee</Label>
+        <Select value={assignee} onChange={(e) => setAssignee(e.target.value)} required>
+          <option value="">Select Assignee</option>
+          {users.map((user) => (
+            <option key={user._id} value={user.username}>{user.username}</option>
+          ))}
+        </Select>
+      </FormGroup>
+      <Button type="submit">{task ? 'Update Task' : 'Create Task'}</Button>
+    </Form>
+  );
 };
 
 export default TaskForm;

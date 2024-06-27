@@ -6,6 +6,7 @@ export interface Task {
     priority: string;
     status: string;
     user: string;
+    assignee: string;
     deleted_at?: Date | null;
 }
 
